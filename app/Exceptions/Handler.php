@@ -3,14 +3,12 @@
 namespace App\Exceptions;
 
 use Exception;
-use Symfony\Component\HttpFoundation\Response;
-use Illuminate\Auth\AuthenticationException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
+use App\Exceptions\ExceptionTrait;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 
 class Handler extends ExceptionHandler
 {
+    use ExceptionTrait;
     /**
      * A list of the exception types that are not reported.
      *
@@ -50,18 +48,9 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
-        if ($request->expectsJson()) {
-            if ($exception instanceof ModelNotFoundException)
-            {
-                return response()->json([
-                    "errors" => "Product Model Not Found"
-                ], Response::HTTP_NOT_FOUND);
-            }
-            if ($exception instanceof NotFoundHttpException) {
-                return response()->json([
-                    "errors" => "Url Not Found"
-                ], Response::HTTP_NOT_FOUND);
-            }
+        if ($request->expectsJson())
+        {
+            return $this->apiException($request, $exception);
         }
         return parent::render($request, $exception);
     }
